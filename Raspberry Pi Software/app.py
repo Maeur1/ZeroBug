@@ -9,10 +9,8 @@ import os
 sio = socketio.AsyncServer()
 app = web.Application()
 sio.attach(app)
-loop = asyncio.get_event_loop()
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 pygame.display.init()
-
-
 
 ser = serial.Serial(
     port='/dev/ttyS0', #Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
@@ -106,10 +104,6 @@ async def gameLoop():
         except pygame.error:
             await asyncio.sleep(1) 
 
-loop = asyncio.get_event_loop()
-loop.create_task(gameLoop())
-serialLoop = asyncio.get_event_loop()
-serialLoop.create_task(serLoop())
 
 def index(request):
     with open(os.path.dirname(__file__)+'/index.html') as f:
@@ -120,14 +114,12 @@ async def sendTemp():
         await asyncio.sleep(3)
         await sio.emit('temp', CPUTemperature().temperature)
 
-loop.create_task(sendTemp())
 
 async def heartbeat():
     while True:
         ser.write(('h\n').encode('utf-8'))
         await asyncio.sleep(1)
 
-loop.create_task(heartbeat())
 
 @sio.on('connect')
 def chat_connection(sid, message):
@@ -186,8 +178,12 @@ async def position(sid, message):
 
 app.router.add_get('/', index)
 
+loop = asyncio.get_event_loop()
+loop.create_task(gameLoop())
+loop.create_task(serLoop())
+loop.create_task(sendTemp())
+loop.create_task(heartbeat())
+
 if __name__ == '__main__':
     web.run_app(app, host='0.0.0.0', port=3000)
     loop.run_forever()
-    serialLoop.run_forever()
-    
