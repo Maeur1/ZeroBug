@@ -176,14 +176,17 @@ async def position(sid, message):
     if message == 1:
         print('power down')
 
-app.router.add_get('/', index)
 
-loop = asyncio.get_event_loop()
-loop.create_task(gameLoop())
-loop.create_task(serLoop())
-loop.create_task(sendTemp())
-loop.create_task(heartbeat())
+async def main():
+    app.router.add_get('/', index)
+    t1 = asyncio.create_task(gameLoop())
+    t2 = asyncio.create_task(serLoop())
+    t3 = asyncio.create_task(sendTemp())
+    t4 = asyncio.create_task(heartbeat())
+    while True:
+        await asyncio.gather(t1, t2, t3, t4, web._run_app(app, host='0.0.0.0', port=3000))
+
 
 if __name__ == '__main__':
-    web.run_app(app, host='0.0.0.0', port=3000)
-    loop.run_forever()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
