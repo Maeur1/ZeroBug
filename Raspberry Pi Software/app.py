@@ -38,71 +38,74 @@ async def serLoop():
 
 async def gameLoop():
     while True:
-        try:
-            pygame.joystick.init()
-            # Check if there is a joystick
-            if(pygame.joystick.get_count()) < 1:   
+        while True:
+            try:
+                pygame.joystick.init()
+                # Check if there is a joystick
+                if(pygame.joystick.get_count()) < 1:   
+                    pygame.joystick.quit()
+                    await asyncio.sleep(1) 
+                else:   
+                    joystick = pygame.joystick.Joystick(0)
+                    break
+            except pygame.error:
                 pygame.joystick.quit()
                 await asyncio.sleep(1) 
-            else:   
-                joystick = pygame.joystick.Joystick(0)
-                break
-        except pygame.error:
-            pygame.joystick.quit()
-            await asyncio.sleep(1) 
-    while True:       
-        try:
-            await asyncio.sleep(0.01)
-            joystick.init()
+        while True:       
+            try:
+                await asyncio.sleep(0.01)
+                joystick.init()
 
-            if joystick.get_button(6):
-                ser.write(('g 1\n').encode('utf-8'))
-            if joystick.get_button(7):
-                ser.write(('g -1\n').encode('utf-8'))
-            if joystick.get_hat(0)[1] == 1:
-                ser.write(('t 0 0 -0.3\n').encode('utf-8'))
-            if joystick.get_hat(0)[1] == -1:
-                ser.write(('t 0 0 0.3\n').encode('utf-8'))
-                
-            # Check for events
-            for event in pygame.event.get():
-                if event.type == pygame.JOYBUTTONDOWN:	
-                    if joystick.get_button(3):
-                        ser.write(('d\n').encode('utf-8'))
-                    elif joystick.get_button(4):
-                        ser.write(('u\n').encode('utf-8'))
-                    elif joystick.get_button(15):
-                        ser.write(('a\n').encode('utf-8'))
-                    elif joystick.get_button(11):
-                        ser.write(('b\n').encode('utf-8'))
-                    elif joystick.get_button(0):
-                        ser.write(('c\n').encode('utf-8'))
-                    elif joystick.get_button(1):
-                        ser.write(('o\n').encode('utf-8'))
-                    elif joystick.get_button(13):
-                        ser.write(('s\n').encode('utf-8'))
-                if event.type == pygame.JOYAXISMOTION:                        
-                    axis0 = joystick.get_axis(0)
-                    axis1 = joystick.get_axis(1)
-                    axis2 = joystick.get_axis(2)
-                    axis3 = joystick.get_axis(3)
-                    axis4 = (joystick.get_axis(4) -joystick.get_axis(5))/2
+                if joystick.get_button(6):
+                    ser.write(('g 1\n').encode('utf-8'))
+                if joystick.get_button(7):
+                    ser.write(('g -1\n').encode('utf-8'))
+                if joystick.get_hat(0)[1] == 1:
+                    ser.write(('t 0 0 -0.3\n').encode('utf-8'))
+                if joystick.get_hat(0)[1] == -1:
+                    ser.write(('t 0 0 0.3\n').encode('utf-8'))
+                    
+                # Check for events
+                for event in pygame.event.get():
+                    if event.type == pygame.JOYBUTTONDOWN:	
+                        if joystick.get_button(3):
+                            ser.write(('d\n').encode('utf-8'))
+                        elif joystick.get_button(4):
+                            ser.write(('u\n').encode('utf-8'))
+                        elif joystick.get_button(15):
+                            ser.write(('a\n').encode('utf-8'))
+                        elif joystick.get_button(11):
+                            ser.write(('b\n').encode('utf-8'))
+                        elif joystick.get_button(0):
+                            ser.write(('c\n').encode('utf-8'))
+                        elif joystick.get_button(1):
+                            ser.write(('o\n').encode('utf-8'))
+                        elif joystick.get_button(13):
+                            ser.write(('s\n').encode('utf-8'))
+                    if event.type == pygame.JOYAXISMOTION:                        
+                        axis0 = joystick.get_axis(0)
+                        axis1 = joystick.get_axis(1)
+                        axis2 = joystick.get_axis(2)
+                        axis3 = joystick.get_axis(3)
+                        axis4 = (joystick.get_axis(4) -joystick.get_axis(5))/2
 
-                    msxString = "{:7.3f}".format(axis0*0.7)
-                    msyString = "{:7.3f}".format(-axis1*1.2)
-                    msrString = "{:7.3f}".format(axis4*0.8)
-                    yawString = "{:7.3f}".format(axis2/5)
-                    pitchString = "{:7.3f}".format(axis3/4)
-                    #print('m %s %s %s\n'%(msxString,msyString,msrString))
-                    if joystick.get_button(6):
-                        ser.write(('t %s %s 0\n'%("{:7.3f}".format(-axis0*20), "{:7.3f}".format(-axis1*32))).encode('utf-8'))
-                    else:
-                        ser.write(('m %s %s %s\n'%(msxString, msyString, msrString)).encode('utf-8'))
-                    ser.write(('r 0 %s %s\n'%(pitchString, yawString)).encode('utf-8'))
-                # Multiple events are generated for the same axis motion, so break after the first
+                        msxString = "{:7.3f}".format(axis0*0.7)
+                        msyString = "{:7.3f}".format(-axis1*1.2)
+                        msrString = "{:7.3f}".format(axis4*0.8)
+                        yawString = "{:7.3f}".format(axis2/5)
+                        pitchString = "{:7.3f}".format(axis3/4)
+                        #print('m %s %s %s\n'%(msxString,msyString,msrString))
+                        if joystick.get_button(6):
+                            ser.write(('t %s %s 0\n'%("{:7.3f}".format(-axis0*20), "{:7.3f}".format(-axis1*32))).encode('utf-8'))
+                        else:
+                            ser.write(('m %s %s %s\n'%(msxString, msyString, msrString)).encode('utf-8'))
+                        ser.write(('r 0 %s %s\n'%(pitchString, yawString)).encode('utf-8'))
+                    # Multiple events are generated for the same axis motion, so break after the first
+                    break
+            except pygame.error:
+                pygame.joystick.quit()
+                await asyncio.sleep(1) 
                 break
-        except pygame.error:
-            await asyncio.sleep(1) 
 
 
 def index(request):
