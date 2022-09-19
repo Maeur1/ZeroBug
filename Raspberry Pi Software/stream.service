@@ -1,0 +1,12 @@
+[Unit]
+Description=Camera Streaming App for Adam Hexapod 
+
+Wants=network.target
+
+[Service]
+Type=simple
+User=mayur
+ExecStart=/usr/bin/python3 "/home/mayur/ZeroBug/Raspberry Pi Software/mjpeg_server.py"
+
+[Install]
+WantedBy=multi-user.target

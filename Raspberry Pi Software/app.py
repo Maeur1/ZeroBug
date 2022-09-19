@@ -177,7 +177,7 @@ async def position(sid, message):
 @sio.on('power')
 async def position(sid, message):
     if message == 1:
-        print('power down')
+        os.system("shutdown now")
 
 
 async def main():
